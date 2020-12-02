@@ -34,8 +34,21 @@ def query_by_subject(word):
 
 
 
+@app.route('/query_by_item/<number>',methods=['GET'])
+def query_by_item(number):
+	if (number.isnumeric()) and (int(number) <= 7) and (int(number) >= 1):
+		conn   = db_connection()
+		cursor = conn.cursor()
+		cursor = conn.execute("SELECT title,quantity,price FROM book WHERE id="+number)
+		books = [
+			dict(title=row[0],quantity=row[1],price=row[2])
+			for row in cursor.fetchall()
+		]
+		if books is not None:
+			return jsonify(books)
 
-
+	else:
+		return "This operation not supported"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',debug = True,port=5002)   

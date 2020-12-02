@@ -23,5 +23,10 @@ def buy():
 	return urllib.request.urlopen('http://127.0.0.1:5001/buy/' + number).read()
 
 
+@app.route('/<any>/<anything>', methods=['GET','POST'] )
+def anything(any,anything):
+	return "This operation not supported"
+
+
 if __name__ == '__main__':
     app.run(debug = True,host = "127.0.0.2", port ="5001")    

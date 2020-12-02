@@ -1,6 +1,6 @@
 
 
-from flask import Flask,jsonify,render_template
+from flask import Flask,jsonify
 import sqlite3
 
 app = Flask(__name__)
@@ -55,15 +55,30 @@ def query_by_item(number):
 
 @app.route('/query/<number>',methods=['GET'])
 def query(number):
-	if (number.isnumeric()) and (int(number) <= 7) and (int(number) >= 1):
-		conn   = db_connection()
-		cursor = conn.cursor()
-		cursor = conn.execute("SELECT quantity FROM book WHERE id="+number)
-		rows   = cursor.fetchall()
-		return str(rows).strip('[]').strip('()').strip(',')
+	conn   = db_connection()
+	cursor = conn.cursor()
+	cursor = conn.execute("SELECT quantity FROM book WHERE id="+number)
+	rows   = cursor.fetchall()
+	return str(rows).strip('[]').strip('()').strip(',')
 
+	
+
+
+
+@app.route('/update/<number>',methods=['GET'])
+def update(number):
+	conn   = db_connection()
+	cursor = conn.cursor()
+	cursor = conn.execute("SELECT * FROM book WHERE id="+number)
+	data = cursor.fetchone()
+	if data[1] > 0:
+		num = data[1]-1
+		query = conn.execute("UPDATE book SET quantity = ? WHERE id="+number,(num,))
+		conn.commit()
+		return "Done"
 	else:
-		return "This operation not supported"
+		return "The buy request failed because the item is out ot stock"
+
 
 
 

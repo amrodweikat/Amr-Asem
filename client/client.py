@@ -19,8 +19,8 @@ def lookup(number):
 
 
 @app.route('/buy/<number>', methods=['POST'] )
-def buy():
-	return urllib.request.urlopen('http://127.0.0.1:5001/buy/' + number).read()
+def buy(number):
+	return urllib.request.urlopen('http://127.0.0.1:5003/buy/' + number).read()
 
 
 @app.route('/<any>/<anything>', methods=['GET','POST'] )

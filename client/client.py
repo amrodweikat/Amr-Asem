@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 
 @app.route('/search/<word>', methods=['GET'] )
-def search_dos(word):	
+def search(word):	
 	return  urllib.request.urlopen("http://127.0.0.1:5001/query_by_subject/" + word).read()
 
 	 

@@ -1,6 +1,6 @@
 
 
-from flask import Flask,jsonify
+from flask import Flask,jsonify,render_template
 import sqlite3
 
 app = Flask(__name__)
@@ -49,6 +49,24 @@ def query_by_item(number):
 
 	else:
 		return "This operation not supported"
+
+
+
+
+@app.route('/query/<number>',methods=['GET'])
+def query(number):
+	if (number.isnumeric()) and (int(number) <= 7) and (int(number) >= 1):
+		conn   = db_connection()
+		cursor = conn.cursor()
+		cursor = conn.execute("SELECT quantity FROM book WHERE id="+number)
+		rows   = cursor.fetchall()
+		return str(rows).strip('[]').strip('()').strip(',')
+
+	else:
+		return "This operation not supported"
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',debug = True,port=5002)   

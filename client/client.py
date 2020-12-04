@@ -10,6 +10,7 @@ app = Flask(__name__)
 cache.init_app(app)
 
 
+#the result of this function will be in the cache for 120s 
 @cache.cached(timeout=120)
 def search_cache(word):
 	return  urllib.request.urlopen("http://127.0.0.1:5001/query_by_subject/" + word.replace(" ", "")).read() #called the query_by_subject function in catalog server
@@ -21,14 +22,24 @@ def search(word):
 	t1 = time.time()
 	w = search_cache(word)
 	t2 = time.time()
-	print("\ntime: "+str(t2-t1)+"\n")
+	print("\ntime_search: "+str(t2-t1)+"\n")
 	return w
+
 	
+#the result of this function will be in the cache for 120s 
+@cache.cached(timeout=120)
+def lookup_cache(number):
+	return  urllib.request.urlopen('http://127.0.0.1:5001/query_by_item/' + number).read() #called the query_by_item function in catalog server
+
 
 	 
 @app.route('/lookup/<number>', methods=['GET'] )
-def lookup(number):	
-	return  urllib.request.urlopen('http://127.0.0.1:5001/query_by_item/' + number).read() #called the query_by_item function in catalog server
+def lookup(number):
+	t1 = time.time()
+	w = lookup_cache(number)
+	t2 = time.time()
+	print("\ntime_lookup: "+str(t2-t1)+"\n")
+	return w	
 
 
 @app.route('/buy/<number>', methods=['POST'] )

@@ -10,9 +10,7 @@ app = Flask(__name__)
 cache.init_app(app)
 
 catalog = 1
-
-order_server_first_replica="127.0.0.1:5003"
-order_server_second_replica="127.0.0.1:5007"
+order   = 1
 
 
 def round_robin_catalog():
@@ -23,6 +21,16 @@ def round_robin_catalog():
 	else:
 		catalog=1
 		return "127.0.0.1:5005"
+
+
+def round_robin_order():
+	global order
+	if order==1:
+		order=2
+		return "127.0.0.1:5003"
+	else:
+		order=1
+		return "127.0.0.1:5007"
 
 
 #the result of this function will be in the cache for 120s 
@@ -45,7 +53,7 @@ def search(word):
 #the result of this function will be in the cache for 120s 
 @cache.cached(timeout=120)
 def lookup_cache(number):
-	return  urllib.request.urlopen('http://127.0.0.1:5001/query_by_item/' + number).read() #called the query_by_item function in catalog server
+	return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_item/" + number).read() #called the query_by_item function in catalog server
 
 
 	 
@@ -55,6 +63,7 @@ def lookup(number):
 	w = lookup_cache(number)
 	t2 = time.time()
 	print("\ntime_lookup: "+str(t2-t1)+"\n")
+	print("next replica number: "+str(catalog)+"\n")
 	return w	
 
 

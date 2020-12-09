@@ -61,8 +61,16 @@ def query(number):
 	rows   = cursor.fetchall()
 	return str(rows).strip('[]').strip('()').strip(',')
 
-	
 
+	
+def update_replica(quantity,number):
+	conn = None
+	try:
+		conn = sqlite3.connect("../../flask2_replica/catalog_server_replica/books-replica.sqlite")
+	except sqlite3.error as e:
+		print(e)
+	query = conn.execute("UPDATE book SET quantity = ? WHERE id="+number,(quantity,)) 
+	conn.commit()
 
 
 @app.route('/update/<number>',methods=['GET'])
@@ -71,13 +79,12 @@ def update(number):
 	cursor = conn.cursor()
 	cursor = conn.execute("SELECT * FROM book WHERE id="+number)
 	data = cursor.fetchone()
-	if data[1] > 0:
-		num = data[1]-1
-		query = conn.execute("UPDATE book SET quantity = ? WHERE id="+number,(num,))
-		conn.commit()
-		return "Done"
-	else:
-		return "The buy request failed because the item is out ot stock"
+	num = data[1]-1
+	query = conn.execute("UPDATE book SET quantity = ? WHERE id="+number,(num,))
+	conn.commit()
+	update_replica(num,number)
+	return "Done"
+	
 
 
 

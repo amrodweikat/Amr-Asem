@@ -53,7 +53,7 @@ def search(word):
 #the result of this function will be in the cache for 120s 
 @cache.cached(timeout=120)
 def lookup_cache(number):
-	return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_item/" + number).read() #called the query_by_item function in catalog server
+	return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_item/" + number).read() #called the query_by_item function in catalog server first replica or second replica
 
 
 	 
@@ -69,7 +69,7 @@ def lookup(number):
 
 @app.route('/buy/<number>', methods=['POST'] )
 def buy(number):
-	return urllib.request.urlopen('http://127.0.0.1:5003/buy/' + number).read() #called the buy function in order server
+	return urllib.request.urlopen("http://"+round_robin_order()+"/buy/" + number).read() #called the buy function in order server first replica or second replica
 
 
 @app.route('/<any>/<anything>', methods=['GET','POST'] )

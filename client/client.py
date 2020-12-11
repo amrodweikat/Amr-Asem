@@ -99,8 +99,9 @@ def lookup(number):
 
 @app.route('/buy/<number>', methods=['POST'] )
 def buy(number):
-	return urllib.request.urlopen("http://"+round_robin_order()+"/buy/" + number).read() #called the buy function in order server first replica or second replica
-
+	result = urllib.request.urlopen("http://"+round_robin_order()+"/buy/" + number).read() #called the buy function in order server first replica or second replica
+	invalid_request_cache(number)
+	return result
 
 @app.route('/<any>/<anything>', methods=['GET','POST'] )
 def anything(any,anything):

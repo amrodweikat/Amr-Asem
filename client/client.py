@@ -2,7 +2,7 @@
 import urllib
 import time
 import random
-from flask import Flask,jsonify
+from flask import Flask
 from flask_caching import Cache
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -13,6 +13,8 @@ cache.init_app(app)
 #cache contains 8 items => 4 items represent request and 4 items represent results of requests
 index = 0
 
+catalog = 1
+order = 1
 
 def round_robin_catalog():
 	global catalog
@@ -34,14 +36,6 @@ def round_robin_order():
 		return "127.0.0.1:5007"
 
 
-#@cache.cached(timeout=120)
-def search_cache():
-	for x in range(10000):
-		s = random.randint(1,10)
-	return str(random.randint(1,100))	
-
-	#return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_subject/" + word.replace(" ", "")).read() #called the query_by_subject function in catalog server first replica or second replica
-
 
 def check_cache(request):
 	global index
@@ -54,13 +48,12 @@ def check_cache(request):
 
 
 @app.route('/<number>',methods=['GET'])
-def hello(number):
-	#cache.set(str(number)+"lookup/")
-	#return "Hi from windows"
-	books={"id":2,"lab":2}
-	w = jsonify(books).text + "Hi"
-	return w
-
+def invalid_request_cache(number):
+	for i in range(4):
+		if  cache.get(i)== "lookup/"+str(number):
+			cache.set(i,None,10000)
+			return ""
+	return ""
 
 
 @app.route('/search/<word>', methods=['GET'] )
@@ -70,7 +63,7 @@ def search(word):
 	t1 = time.time()
 	w = list(check_cache("search/"+str(word)))
 	if w[0] == "false":
-		result = search_cache()
+		result = urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_subject/" + word.replace(" ", "")).read() #called the query_by_subject function in catalog server first replica or second replica
 		cache.set(index,"search/"+str(word),10000)
 		cache.set(index+10,result,10000)
 		index=index+1
@@ -79,7 +72,7 @@ def search(word):
 	t2 = time.time()
 	print("\ntime_search: "+str(t2-t1))
 	print("index: "+str(index))
-	#print("next replica number: "+str(catalog)+"\n")
+	print("next replica number: "+str(catalog))
 	return result
 
 	

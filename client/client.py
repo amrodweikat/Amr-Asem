@@ -72,7 +72,7 @@ def search(word):
 	t2 = time.time()
 	print("\ntime_search: "+str(t2-t1))
 	print("index: "+str(index))
-	print("next replica number: "+str(catalog))
+	print("next catalog replica number: "+str(catalog))
 	return result
 
 	
@@ -93,7 +93,7 @@ def lookup(number):
 	t2 = time.time()
 	print("\ntime_search: "+str(t2-t1))
 	print("index: "+str(index))
-	print("next replica number: "+str(catalog))
+	print("next order replica number: "+str(order))
 	return result	
 
 

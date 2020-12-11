@@ -1,7 +1,8 @@
 
 import urllib
 import time
-from flask import Flask
+import random
+from flask import Flask,jsonify
 from flask_caching import Cache
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -9,8 +10,8 @@ cache = Cache(config={'CACHE_TYPE': 'simple'})
 app = Flask(__name__)
 cache.init_app(app)
 
-catalog = 1
-order   = 1
+#cache contains 8 items => 4 items represent request and 4 items represent results of requests
+index = 0
 
 
 def round_robin_catalog():
@@ -33,21 +34,53 @@ def round_robin_order():
 		return "127.0.0.1:5007"
 
 
-#the result of this function will be in the cache for 120s 
-@cache.cached(timeout=120)
-def search_cache(word):
-	return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_subject/" + word.replace(" ", "")).read() #called the query_by_subject function in catalog server first replica or second replica
+#@cache.cached(timeout=120)
+def search_cache():
+	for x in range(10000):
+		s = random.randint(1,10)
+	return str(random.randint(1,100))	
+
+	#return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_subject/" + word.replace(" ", "")).read() #called the query_by_subject function in catalog server first replica or second replica
+
+
+def check_cache(request):
+	global index
+	if index > 3:
+		index = 0
+	for i in range(4):
+		if  cache.get(i)== request:
+			return "true",cache.get(i+10)
+	return "false",None
+
+
+@app.route('/<number>',methods=['GET'])
+def hello(number):
+	#cache.set(str(number)+"lookup/")
+	#return "Hi from windows"
+	books={"id":2,"lab":2}
+	w = jsonify(books).text + "Hi"
+	return w
 
 
 
 @app.route('/search/<word>', methods=['GET'] )
 def search(word):
+	global index
+	result = None
 	t1 = time.time()
-	w = search_cache(word)
+	w = list(check_cache("search/"+str(word)))
+	if w[0] == "false":
+		result = search_cache()
+		cache.set(index,"search/"+str(word),10000)
+		cache.set(index+10,result,10000)
+		index=index+1
+	else:
+		result=w[1]	
 	t2 = time.time()
-	print("\ntime_search: "+str(t2-t1)+"\n")
-	print("next replica number: "+str(catalog)+"\n")
-	return w
+	print("\ntime_search: "+str(t2-t1))
+	print("index: "+str(index))
+	#print("next replica number: "+str(catalog)+"\n")
+	return result
 
 	
 #the result of this function will be in the cache for 120s 
@@ -78,4 +111,4 @@ def anything(any,anything):
 
 
 if __name__ == '__main__':
-    app.run(debug = True,host = "127.0.0.2", port ="5001")    
+    app.run(debug = True,host = "127.0.0.1", port ="4502")    

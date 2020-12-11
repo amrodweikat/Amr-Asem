@@ -76,21 +76,25 @@ def search(word):
 	return result
 
 	
-#the result of this function will be in the cache for 120s 
-@cache.cached(timeout=120)
-def lookup_cache(number):
-	return  urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_item/" + number).read() #called the query_by_item function in catalog server first replica or second replica
-
-
-	 
+ 
 @app.route('/lookup/<number>', methods=['GET'] )
 def lookup(number):
+	global index
+	result = None
 	t1 = time.time()
-	w = lookup_cache(number)
+	w = list(check_cache("lookup/"+str(number)))
+	if w[0] == "false":
+		result = urllib.request.urlopen("http://"+round_robin_catalog()+"/query_by_item/" + number).read() #called the query_by_item function in catalog server first replica or second replica
+		cache.set(index,"lookup/"+str(number),10000)
+		cache.set(index+10,result,10000)
+		index=index+1
+	else:
+		result=w[1]	
 	t2 = time.time()
-	print("\ntime_lookup: "+str(t2-t1)+"\n")
-	print("next replica number: "+str(catalog)+"\n")
-	return w	
+	print("\ntime_search: "+str(t2-t1))
+	print("index: "+str(index))
+	print("next replica number: "+str(catalog))
+	return result	
 
 
 @app.route('/buy/<number>', methods=['POST'] )

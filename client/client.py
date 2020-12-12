@@ -1,7 +1,6 @@
 
 import urllib
 import time
-import random
 from flask import Flask
 from flask_caching import Cache
 

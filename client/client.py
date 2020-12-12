@@ -79,7 +79,7 @@ def search(word):
 @app.route('/lookup/<number>', methods=['GET'] )
 def lookup(number):
 	global index
-	result = None
+	result = "None"
 	t1 = time.time()
 	w = list(check_cache("lookup/"+str(number)))
 	if w[0] == "false":
@@ -92,7 +92,7 @@ def lookup(number):
 	t2 = time.time()
 	print("\ntime_search: "+str(t2-t1))
 	print("index: "+str(index))
-	print("next order replica number: "+str(order))
+	print("next order replica number: "+str(catalog))
 	return result	
 
 

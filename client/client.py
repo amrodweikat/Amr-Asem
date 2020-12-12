@@ -46,7 +46,7 @@ def check_cache(request):
 	return "false",None
 
 
-@app.route('/<number>',methods=['GET'])
+
 def invalid_request_cache(number):
 	for i in range(4):
 		if  cache.get(i)== "lookup/"+str(number):
